@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1044037788931",
+    "project_id": "alerta-huracanes-pc",
+    "storage_bucket": "alerta-huracanes-pc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1044037788931:android:f757ccdc0c57ec4aa6f536",
+        "android_client_info": {
+          "package_name": "com.example.alerta_cancun_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAalDtsvzOdF-0JVNeGtogcBBsnQnbmQgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
