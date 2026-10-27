@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
-import '../permissions/permissions_screen.dart';
+import '../../../data/datasources/basedatos_local.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -36,10 +38,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _finish() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const PermissionsScreen()),
+  Future<void> _finish() async {
+    await BaseDatosLocal.instance.guardarConfiguracion(
+      clave: 'onboarding_completado',
+      valor: true,
     );
+
+    if (!mounted) return;
+
+    context.go('/permissions');
   }
 
   @override

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
-import '../onboarding/onboarding_screen.dart';
 
 class BienvenidaScreen extends StatelessWidget {
   const BienvenidaScreen({super.key});
@@ -81,11 +82,7 @@ class BienvenidaScreen extends StatelessWidget {
                 height: 64,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const OnboardingScreen(),
-                      ),
-                    );
+                    context.push('/onboarding');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.dorado,

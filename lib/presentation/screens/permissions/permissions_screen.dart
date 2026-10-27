@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/app_colors.dart';
-import '../../main_shell.dart';
+import '../../../data/datasources/basedatos_local.dart';
 
 class PermissionsScreen extends StatefulWidget {
   const PermissionsScreen({super.key});
@@ -13,9 +15,18 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
   bool _gps = false;
   bool _notif = false;
 
-  void _goHome() => Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-      );
+  Future<void> _savePermissionsAndGoHome({required bool granted}) async {
+    await BaseDatosLocal.instance.guardarConfiguracion(
+      clave: 'permisos_otorgados',
+      valor: granted,
+    );
+
+    if (!mounted) return;
+
+    context.go('/main');
+  }
+
+  Future<void> _goHome() async => _savePermissionsAndGoHome(granted: false);
 
   @override
   Widget build(BuildContext context) {
@@ -104,12 +115,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 width: double.infinity,
                 height: 64,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
                       _gps = true;
                       _notif = true;
                     });
-                    _goHome();
+                    await _savePermissionsAndGoHome(granted: true);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.guinda,

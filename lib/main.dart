@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'core/config/firebase_options.dart';
-import 'core/theme/app_colors.dart';
-import 'presentation/screens/splash/splash_screen.dart';
 
-void main() async {
+import 'core/config/firebase_options.dart';
+import 'core/routes/app_router.dart';
+import 'core/theme/app_colors.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -17,7 +18,7 @@ class AlertaCancunApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Protección Civil Cancún',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -29,7 +30,7 @@ class AlertaCancunApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }

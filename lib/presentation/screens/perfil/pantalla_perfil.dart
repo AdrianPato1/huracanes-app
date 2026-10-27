@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../notificaciones/historial_notificaciones_screen.dart';
 
 class PantallaPerfil extends StatelessWidget {
   const PantallaPerfil({super.key});
@@ -85,6 +86,19 @@ class PantallaPerfil extends StatelessWidget {
                   leading: Icon(Icons.info_outline, color: AppColors.guinda),
                   title: Text('Acerca de la Aplicación'),
                   subtitle: Text('Versión 1.0.0 - Protección Civil Cancún'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.history_toggle_off_rounded, color: AppColors.guinda),
+                  title: const Text('Historial de Alertas'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const HistorialNotificacionesScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(

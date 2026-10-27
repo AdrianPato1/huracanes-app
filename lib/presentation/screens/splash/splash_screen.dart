@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
-import '../bienvenida/bienvenida_screen.dart';
+import '../../../data/datasources/basedatos_local.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,16 +49,24 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animController.forward();
 
-    _navTimer = Timer(const Duration(milliseconds: 2800), () {
+    _navTimer = Timer(const Duration(milliseconds: 2800), () async {
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, _, _) => const BienvenidaScreen(),
-          transitionsBuilder: (_, animation, _, child) =>
-              FadeTransition(opacity: animation, child: child),
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
-      );
+
+      final db = BaseDatosLocal.instance;
+      await db.database;
+
+      final onboardingCompletado = await db.obtenerConfiguracion('onboarding_completado') ?? false;
+      final permisosOtorgados = await db.obtenerConfiguracion('permisos_otorgados') ?? false;
+
+      if (!mounted) return;
+
+      if (onboardingCompletado && permisosOtorgados) {
+        context.go('/main');
+      } else if (onboardingCompletado) {
+        context.go('/permissions');
+      } else {
+        context.go('/onboarding');
+      }
     });
   }
 

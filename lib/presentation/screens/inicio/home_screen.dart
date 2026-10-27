@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/routes/app_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../providers/semaforo_provider.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/semaforo_card.dart';
-import '../alert_detail/alert_detail_screen.dart';
-import '../refugios/pantalla_mapa.dart';
-import '../../../data/repositories/alertas_repository.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onBuscarRefugio;
@@ -16,37 +16,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  AlertLevel _level = AlertLevel.verde;
-  String _titulo = 'Cargando semáforo...';
-  String _mensaje = '';
+  late final SemaforoProvider _provider;
+  AlertLevel _previewLevel = AlertLevel.verde;
 
   @override
   void initState() {
     super.initState();
-    _iniciarAlertas();
+    _provider = SemaforoProvider();
+    _provider.cargarAlerta();
+    _previewLevel = _provider.level;
   }
 
-  void _iniciarAlertas() {
-    final repo = AlertasRepository.instance;
-    repo.alertaStream.listen((alerta) {
-      if (mounted) {
-        setState(() {
-          _level = alerta.level;
-          _titulo = alerta.titulo;
-          _mensaje = alerta.mensaje;
-        });
-      }
+  @override
+  void dispose() {
+    _provider.dispose();
+    super.dispose();
+  }
+
+  // Permite alternar manualmente para previsualizar los 3 estados.
+  void _cycle() {
+    final nextIndex = (_previewLevel.index + 1) % AlertLevel.values.length;
+    setState(() {
+      _previewLevel = AlertLevel.values[nextIndex];
     });
-    repo.iniciarSincronizacion();
   }
 
-  // Permite alternar manualmente para previsualizar los 3 estados
-  void _cycle() => setState(() =>
-      _level = AlertLevel.values[(_level.index + 1) % AlertLevel.values.length]);
-
-  void _openDetail() => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const AlertDetailScreen()),
-      );
+  void _openDetail() => AppRouter.goToAlertDetail(context);
 
   // Llamada telefónica nativa (911, Bomberos, etc.)
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -67,28 +62,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      const HomeHeader(),
-      Expanded(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SemaforoCard(level: _level, onTap: _cycle),
-            const SizedBox(height: 20),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: KeyedSubtree(
-                key: ValueKey(_level),
-                child: _content(_level),
-              ),
+    return AnimatedBuilder(
+      animation: _provider,
+      builder: (context, _) {
+        final level = _previewLevel;
+        final titulo = _provider.titulo;
+        final mensaje = _provider.mensaje;
+
+        return Column(children: [
+          const HomeHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                SemaforoCard(level: level, onTap: _cycle),
+                const SizedBox(height: 20),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: KeyedSubtree(
+                    key: ValueKey(level),
+                    child: _content(level, titulo, mensaje),
+                  ),
+                ),
+              ]),
             ),
-          ]),
-        ),
-      ),
-    ]);
+          ),
+        ]);
+      },
+    );
   }
 
-  Widget _content(AlertLevel l) {
+  Widget _content(AlertLevel l, String titulo, String mensaje) {
     switch (l) {
       case AlertLevel.verde:
         return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -97,16 +101,16 @@ class _HomeScreenState extends State<HomeScreen> {
           _NewsTile(
             icon: Icons.wb_sunny_outlined,
             tag: 'CLIMA · HOY',
-            text: _titulo.isNotEmpty
-                ? _titulo
+            text: titulo.isNotEmpty
+                ? titulo
                 : 'Cielo despejado y máxima de 33 °C en Cancún',
           ),
           const SizedBox(height: 14),
           _NewsTile(
             icon: Icons.menu_book_rounded,
             tag: 'CONSEJO OFICIAL',
-            text: _mensaje.isNotEmpty
-                ? _mensaje
+            text: mensaje.isNotEmpty
+                ? mensaje
                 : 'Revisa tu mochila de emergencia antes de la temporada',
           ),
         ]);
@@ -129,16 +133,16 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _WeatherCard(
                   tag: 'HOY · 8:00 h',
-                  text: _titulo.isNotEmpty
-                      ? _titulo
+                  text: titulo.isNotEmpty
+                      ? titulo
                       : 'Tormenta tropical se intensifica a huracán categoría 2',
                   onTap: _openDetail,
                 ),
                 const SizedBox(width: 14),
                 _WeatherCard(
                   tag: 'HOY · 9:30 h',
-                  text: _mensaje.isNotEmpty
-                      ? _mensaje
+                  text: mensaje.isNotEmpty
+                      ? mensaje
                       : 'Se espera marejada ciclónica en la costa',
                   onTap: _openDetail,
                 ),
@@ -160,9 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return;
               }
 
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PantallaMapa()),
-              );
+              AppRouter.goToMap(context);
             },
           ),
           const SizedBox(height: 22),

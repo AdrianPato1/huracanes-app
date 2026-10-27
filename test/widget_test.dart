@@ -1,30 +1,17 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:alerta_cancun_app/presentation/screens/refugios/refugio_detalle_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:alerta_cancun_app/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const AlertaCancunApp());
+  test('buildRefugioMapUri usa OpenStreetMap con coordenadas del refugio', () {
+    final uri = buildRefugioMapUri(
+      latitude: 21.1619,
+      longitude: -86.8252,
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(uri.scheme, 'https');
+    expect(uri.host, 'www.openstreetmap.org');
+    expect(uri.queryParameters['mlat'], '21.1619');
+    expect(uri.queryParameters['mlon'], '-86.8252');
+    expect(uri.fragment, 'map=16/21.1619/-86.8252');
   });
 }
